@@ -3,7 +3,6 @@ package com.gauravc6.distress.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.gauravc6.distress.data.DatabaseHandler;
 import com.gauravc6.distress.model.Contact;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -75,17 +75,60 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         @Override
         public void onClick(View v) {
             int position;
+            position = getAdapterPosition();
+            Contact contact = contactList.get(position);
 
             switch(v.getId()) {
                 case R.id.editButton:
-                    // TODO: edit contact
+                    editContact(contact);
                     break;
                 case R.id.deleteButton:
-                    position = getAdapterPosition();
-                    Contact contact = contactList.get(position);
                     deleteContact(contact.getId());
                     break;
             }
+
+        }
+
+        private void editContact(final Contact contact) {
+
+            builder = new AlertDialog.Builder(context);
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View view = inflater.inflate(R.layout.contact_popup, null);
+            Button saveButton;
+            TextView title;
+
+            contactName = view.findViewById(R.id.contactName);
+            contactNumber = view.findViewById(R.id.contactNumber);
+            saveButton = view.findViewById(R.id.saveButton);
+            title = view.findViewById(R.id.title);
+
+            title.setText(R.string.edit_contact);
+
+            builder.setView(view);
+            dialog = builder.create();
+            dialog.show();
+
+            contactName.setText(contact.getName());
+            contactNumber.setText(String.valueOf(contact.getContactNumber()));
+
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DatabaseHandler databaseHandler = new DatabaseHandler(context);
+                    contact.setName(contactName.getText().toString());
+                    contact.setContactNumber(Long.parseLong(contactNumber.getText().toString()));
+
+                    if (!contactName.getText().toString().isEmpty()
+                            && !contactNumber.getText().toString().isEmpty()
+                            && contactNumber.getText().toString().length() == 10) {
+                        databaseHandler.updateContact(contact);
+                        notifyItemChanged(getAdapterPosition());
+                        dialog.dismiss();
+                    } else {
+                        Snackbar.make(v, "Please enter valid details!", Snackbar.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
         }
 

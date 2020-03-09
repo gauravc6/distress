@@ -10,5 +10,6 @@
     <string name="enter_contact">Enter Contact Details</string>
     <string name="hint_name">Contact Name</string>
     <string name="hint_number">Enter Number</string>
+    <string name="edit_contact">Edit Contact</string>
 
 </resources>
