@@ -1,6 +1,7 @@
 package com.gauravc6.distress.ui;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,8 +38,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onBindViewHolder(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
 
         Contact contact = contactList.get(position);
-        holder.contactName.setText(MessageFormat.format("Contact name: {0}", contact.getName()));
-        holder.contactNumber.setText(MessageFormat.format("Color: {0}", contact.getContactNumber()));
+        holder.contactName.setText(MessageFormat.format("Contact Name: {0}", contact.getName()));
+        holder.contactNumber.setText(MessageFormat.format("Contact Number: {0}", String.valueOf(contact.getContactNumber())));
     }
 
     @Override
