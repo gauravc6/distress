@@ -1,22 +1,34 @@
 package com.gauravc6.distress;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
+import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+
+import com.gauravc6.distress.data.DatabaseHandler;
+import com.gauravc6.distress.model.Contact;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    ImageView sendDistress;
+    private ImageView sendDistress;
+    private static int sms_request = 1;
+    private List<Contact> contactList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         sendDistress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Send message to added contacts
+                sendDistressAlert(v);
             }
         });
 
@@ -41,6 +53,44 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void sendDistressAlert(View view) {
+        // TODO: Create shared prefs for distressMessage
+        String distressMessage = "Testing...";
+        if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, sms_request);
+        } else {
+            DatabaseHandler databaseHandler = new DatabaseHandler(this);
+            contactList = databaseHandler.getAllContacts();
+            try {
+                SmsManager smsManager = SmsManager.getDefault();
+
+                if (contactList.size() == 0) {
+                    Toast.makeText(this, "You need to add at least 1 contact!", Toast.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(view, "Sending distress alerts...", Snackbar.LENGTH_LONG).show();
+                    for (Contact contact: contactList) {
+                        smsManager.sendTextMessage(String.valueOf(contact.getContactNumber()),null, distressMessage,null,null);
+                        Snackbar.make(view, "Distress Alert sent!", Snackbar.LENGTH_LONG).show();
+                    }
+                }
+            } catch (Exception e) {
+                Log.d("SMS", "sendDistressAlert: " + e);
+                Toast.makeText(this,"Failed sending!",Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    public void onRequestPermissionResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grant) {
+        super.onRequestPermissionsResult(requestCode, permissions, grant);
+        if (requestCode == sms_request) {
+            if (grant.length>0 && grant[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted! Click again to send distress!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Permission to send messages is denied.",Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
