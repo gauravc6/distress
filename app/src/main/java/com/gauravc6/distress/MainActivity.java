@@ -1,7 +1,9 @@
 package com.gauravc6.distress;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -26,9 +28,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private String distressMessage;
     private ImageView sendDistress;
     private static int sms_request = 1;
     private List<Contact> contactList;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        sharedPreferences = getSharedPreferences("SettingPreferences",Context.MODE_PRIVATE);
 
         sendDistress = findViewById(R.id.send_distress);
 
@@ -56,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendDistressAlert(View view) {
-        // TODO: Create shared prefs for distressMessage
-        String distressMessage = "Testing...";
+        distressMessage = sharedPreferences.getString("DistressMessage", "I'm in danger!! HELP!!");
+
         if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, sms_request);
         } else {

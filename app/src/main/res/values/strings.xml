@@ -11,5 +11,8 @@
     <string name="hint_name">Contact Name</string>
     <string name="hint_number">Enter Number</string>
     <string name="edit_contact">Edit Contact</string>
+    <string name="distress_message">Distress Message</string>
+    <string name="change_distress_message">Change Distress Message</string>
+    <string name="hint_distress_message">Distress Message</string>
 
 </resources>

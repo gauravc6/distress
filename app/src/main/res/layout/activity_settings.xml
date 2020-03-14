@@ -20,5 +20,37 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/changeAlertMessageCardView"
+        android:layout_width="390dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="65dp"
+        app:cardCornerRadius="10dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="106dp">
+
+            <TextView
+                android:id="@+id/changeAlertText"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:paddingLeft="5dp"
+                android:paddingTop="5dp"
+                android:text="@string/change_distress_message"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/alertText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/changeAlertText"
+                android:paddingLeft="10dp"
+                android:textSize="15sp" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
