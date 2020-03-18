@@ -14,5 +14,6 @@
     <string name="distress_message">Distress Message</string>
     <string name="change_distress_message">Change Distress Message</string>
     <string name="hint_distress_message">Distress Message</string>
+    <string name="send_distress_confirmation">Toggle confirmation dialog before sending distress.</string>
 
 </resources>

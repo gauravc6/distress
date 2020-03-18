@@ -1,7 +1,9 @@
 package com.gauravc6.distress;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -28,7 +30,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    AlertDialog dialog;
+    AlertDialog.Builder builder;
     private String distressMessage;
+    private boolean distressConfirmationToggle;
     private ImageView sendDistress;
     private static int sms_request = 1;
     private List<Contact> contactList;
@@ -61,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void sendDistressAlert(View view) {
+    private void sendDistressAlert(final View view) {
         distressMessage = sharedPreferences.getString("DistressMessage", "I'm in danger!! HELP!!");
+        distressConfirmationToggle = sharedPreferences.getBoolean("DistressConfirmation",false);
 
         if (checkSelfPermission(Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, sms_request);
@@ -70,15 +76,30 @@ public class MainActivity extends AppCompatActivity {
             DatabaseHandler databaseHandler = new DatabaseHandler(this);
             contactList = databaseHandler.getAllContacts();
             try {
-                SmsManager smsManager = SmsManager.getDefault();
-
                 if (contactList.size() == 0) {
                     Toast.makeText(this, "You need to add at least 1 contact!", Toast.LENGTH_LONG).show();
                 } else {
-                    Snackbar.make(view, "Sending distress alerts...", Snackbar.LENGTH_LONG).show();
-                    for (Contact contact: contactList) {
-                        smsManager.sendTextMessage(String.valueOf(contact.getContactNumber()),null, distressMessage,null,null);
-                        Snackbar.make(view, "Distress Alert sent!", Snackbar.LENGTH_LONG).show();
+                    if (distressConfirmationToggle) {
+                        builder = new AlertDialog.Builder(this);
+                        builder.setMessage("Send distress alerts to all contacts immediately?").setCancelable(true)
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dispatchAlerts(view);
+                                        dialog.dismiss();
+                                    }
+                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Snackbar.make(view, "Sending distress alerts cancelled!", Snackbar.LENGTH_LONG).show();
+                            }
+                        });
+                        dialog = builder.create();
+                        dialog.setTitle("Distress Confirmation");
+                        dialog.show();
+                    } else {
+                        dispatchAlerts(view);
                     }
                 }
             } catch (Exception e) {
@@ -86,6 +107,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this,"Failed sending!",Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public void dispatchAlerts(View view) {
+        SmsManager smsManager = SmsManager.getDefault();
+        Snackbar.make(view, "Sending distress alerts...", Snackbar.LENGTH_LONG).show();
+        for (Contact contact: contactList) {
+            smsManager.sendTextMessage(String.valueOf(contact.getContactNumber()),null, distressMessage,null,null);
+        }
+        Snackbar.make(view, "Distress Alert sent!", Snackbar.LENGTH_LONG).show();
     }
 
     public void onRequestPermissionResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grant) {
